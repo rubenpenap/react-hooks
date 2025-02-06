@@ -1,23 +1,11 @@
 import * as React from 'react'
+import {ErrorBoundary} from 'react-error-boundary'
 import {
   PokemonForm,
   fetchPokemon,
   PokemonInfoFallback,
   PokemonDataView,
 } from '../pokemon'
-
-class ErrorBoundary extends React.Component {
-  state = {error: null}
-  static getDerivedStateFromError(error) {
-    return {error}
-  }
-  render() {
-    const {error} = this.state
-    const {FallbackComponent, children} = this.props
-    if (error) return <FallbackComponent error={error} />
-    return children
-  }
-}
 
 function PokemonInfo({pokemonName}) {
   const [state, setState] = React.useState({
@@ -60,11 +48,16 @@ function App() {
     setPokemonName(newPokemonName)
   }
 
-  function ErrorFallback({error}) {
+  function handleReset() {
+    setPokemonName('')
+  }
+
+  function ErrorFallback({error, resetErrorBoundary}) {
     return (
       <div role="alert">
         There was an error:{' '}
         <pre style={{whiteSpace: 'normal'}}>{error.message}</pre>
+        <button onClick={resetErrorBoundary}>Try again</button>
       </div>
     )
   }
@@ -73,7 +66,7 @@ function App() {
       <PokemonForm pokemonName={pokemonName} onSubmit={handleSubmit} />
       <hr />
       <div className="pokemon-info">
-        <ErrorBoundary FallbackComponent={ErrorFallback} key={pokemonName}>
+        <ErrorBoundary FallbackComponent={ErrorFallback} onReset={handleReset}>
           <PokemonInfo pokemonName={pokemonName} />
         </ErrorBoundary>
       </div>
